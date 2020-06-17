@@ -45,9 +45,9 @@ def get_last_modified(repo):
         repo {git.Repo} -- The repository object
     """
     changed_files = repo.git.diff('HEAD~1..HEAD', name_only=True).split()
-    for filepath in changed_files:
-        if not filepath.startswith('content/'):
-            changed_files.remove(filepath)
+    # for filepath in changed_files:
+    #    if not filepath.startswith('content/'):
+    #        changed_files.remove(filepath)
     return changed_files
 
 
