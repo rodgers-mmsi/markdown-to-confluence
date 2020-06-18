@@ -194,7 +194,8 @@ def deploy_file(post_path, args, confluence):
     for i, attachment in enumerate(attachments):
         attachments[i] = os.path.join(static_path, attachment.lstrip('/'))
 
-    slug_prefix = '_'.join(author.lower() for author in authors)
+    # slug_prefix = '_'.join(author.lower() for author in authors)
+    slug_prefix = ''
     post_slug = get_slug(post_path, prefix=slug_prefix)
 
     ancestor_id = front_matter['wiki'].get('ancestor_id', args.ancestor_id)
