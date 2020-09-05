@@ -190,7 +190,7 @@ def deploy_file(post_path, args, confluence):
     # Normalize the content into whatever format Confluence expects
     html, attachments = convtoconf(markdown, front_matter=front_matter)
 
-    static_path = os.path.join(args.git, 'static')
+    static_path = args.git
     for i, attachment in enumerate(attachments):
         attachments[i] = os.path.join(static_path, attachment.lstrip('/'))
 

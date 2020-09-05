@@ -122,12 +122,18 @@ class ConfluenceRenderer(mistune.Renderer):
         return '<h1>Authors</h1><p>{}</p>'.format(author_content)
 
     def block_code(self, code, lang):
+        macroname = ''
+        if lang == 'puml':
+            macroname = 'plantuml'
+        else:
+            macroname = 'code'
+
         return textwrap.dedent('''\
-            <ac:structured-macro ac:name="code" ac:schema-version="1">
+            <ac:structured-macro ac:name="{m}" ac:schema-version="1">
                 <ac:parameter ac:name="language">{l}</ac:parameter>
                 <ac:plain-text-body><![CDATA[{c}]]></ac:plain-text-body>
             </ac:structured-macro>
-        ''').format(c=code, l=lang or '')
+        ''').format(c=code, l=lang or '', m=macroname)
 
     def image(self, src, title, alt_text):
         """Renders an image into XHTML expected by Confluence.
