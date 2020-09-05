@@ -50,6 +50,8 @@ class Confluence():
         self.password = password
         self.dry_run = dry_run
 
+        log.info('Username={u}  Password={p}'.format(u=username, p=password))
+
         if _client is None:
             _client = requests.Session()
 
