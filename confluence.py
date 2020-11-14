@@ -50,8 +50,6 @@ class Confluence():
         self.password = password
         self.dry_run = dry_run
 
-        log.info('Username={u}  Password={p}'.format(u=username, p=password))
-
         if _client is None:
             _client = requests.Session()
 
@@ -145,7 +143,7 @@ class Confluence():
     def put(self, path=None, params=None, data=None):
         return self._request(method='PUT', path=path, params=params, data=data)
 
-    def exists(self, space=None, slug=None, ancestor_id=None):
+    def exists(self, space=None, slug=None, ancestor_id=None, title=None):
         """Returns the Confluence page that matches the provided metdata, if it exists.
 
         Specifically, this leverages a Confluence Query Language (CQL) query
@@ -172,7 +170,21 @@ class Confluence():
         params = {'expand': 'version', 'cql': cql}
         response = self.get(path='content/search', params=params)
         if not response.get('size'):
-            return None
+            if title:
+                cql_args = ['title=\'{}\''.format(title)]
+                if ancestor_id:
+                    cql_args.append('ancestor={}'.format(ancestor_id))
+                if space:
+                    cql_args.append('space={!r}'.format(space))
+                cql = ' and '.join(cql_args)
+
+                params = {'expand': 'version', 'cql': cql}
+                response = self.get(path='content/search', params=params)
+                if not response.get('size'):
+                    return None
+                return response['results'][0]
+            else:
+                return None
         return response['results'][0]
 
     def create_labels(self, page_id=None, slug=None, tags=[]):

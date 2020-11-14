@@ -2,6 +2,7 @@ import mistune
 import os
 import textwrap
 import yaml
+import re
 
 from urllib.parse import urlparse
 
@@ -39,20 +40,20 @@ def convtoconf(markdown, front_matter={}):
 
     author_keys = front_matter.get('author_keys', [])
     renderer = ConfluenceRenderer(authors=author_keys)
-    content_html = mistune.markdown(markdown, renderer=renderer)
+    content_html = mistune.markdown(markdown, renderer=renderer, plugins=['strikethrough', 'footnotes', 'table'])
     page_html = renderer.layout(content_html)
 
     return page_html, renderer.attachments
 
 
-class ConfluenceRenderer(mistune.Renderer):
+class ConfluenceRenderer(mistune.HTMLRenderer):
     def __init__(self, authors=[]):
         self.attachments = []
         if authors is None:
             authors = []
         self.authors = authors
         self.has_toc = False
-        super().__init__()
+        super().__init__(escape=False)
 
     def layout(self, content):
         """Renders the final layout of the content. This includes a two-column
@@ -134,6 +135,24 @@ class ConfluenceRenderer(mistune.Renderer):
                 <ac:plain-text-body><![CDATA[{c}]]></ac:plain-text-body>
             </ac:structured-macro>
         ''').format(c=code, l=lang or '', m=macroname)
+
+    def block_html(self, html):
+        match = re.search(r'<details>\s*<summary>(.*)</summary>', html)
+        if match is not None:
+            title = match.groups()[0]
+            return textwrap.dedent('''\
+                <ac:structured-macro ac:name="{m}" ac:schema-version="1">
+                    <ac:parameter ac:name="title">{t}</ac:parameter>
+                    <ac:rich-text-body>
+            ''').format(m='expand', t=title)
+        match = re.search(r'</details>\s*(.*)', html)
+        if match is not None:
+            return textwrap.dedent('''\
+                    </ac:rich-text-body>
+                   </ac:structured-macro>{html}
+           ''').format(html = super().inline_html(match.groups()[0]))
+        return super().block_html(html)
+
 
     def image(self, src, title, alt_text):
         """Renders an image into XHTML expected by Confluence.

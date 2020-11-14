@@ -7,7 +7,7 @@ import sys
 
 from confluence import Confluence
 from convert import convtoconf, parse
-"""Deploys Markdown posts to Confluenceo
+"""Deploys Markdown posts to Confluence
 
 This script is meant to be executed as either part of a CI/CD job or on an
 adhoc basis.
@@ -206,6 +206,7 @@ def deploy_file(post_path, args, confluence):
         tags.append(args.global_label)
 
     page = confluence.exists(slug=post_slug,
+                             title=front_matter['title'],
                              ancestor_id=ancestor_id,
                              space=space)
     if page:
